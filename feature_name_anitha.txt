@@ -1,0 +1,15 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS builder
+COPY . /app
+WORKDIR /app
+RUN dotnet publish -c Release -o /published
+
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS application
+LABEL author="Anitha"
+EXPOSE 5001
+RUN useradd -m -d /app -s /bin/bash dotnet
+USER dotnet 
+COPY --from=builder --chown=dotnet:dotnet /app/published /app
+WORKDIR /app
+ENV ASPNETCORE_URLS="http://0.0.0.0:5001"
+CMD ["dotnet", "DockerDotnetCore.dll"]
+
